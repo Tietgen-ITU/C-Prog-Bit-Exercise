@@ -178,7 +178,10 @@ NOTES:
  *   Rating: 1
  */
 int bitXor(int x, int y) {
-  return 2;
+  int or = ~x & ~y;
+  int and = x & y;
+
+  return ~or & ~and;
 }
 /* 
  * tmin - return minimum two's complement integer 
@@ -187,7 +190,8 @@ int bitXor(int x, int y) {
  *   Rating: 1
  */
 int tmin(void) {
-  return 2;
+
+  return 0x01 << 31;
 }
 //2
 /* 
@@ -199,7 +203,17 @@ int tmin(void) {
  *   Rating: 2
  */
 int allOddBits(int x) {
-  return 2;
+  int even_bits = 0x55;
+  int mask_end = even_bits << 24;
+  int mask_mid = even_bits << 16;
+  int mask_sec_mid = even_bits << 8;
+
+  // Create a mask for the evenbits
+  int realMask = mask_end | mask_mid | mask_sec_mid | even_bits;
+
+  int res = (realMask | x) + 1;
+
+  return !res;
 }
 /* 
  * negate - return -x 
@@ -209,7 +223,8 @@ int allOddBits(int x) {
  *   Rating: 2
  */
 int negate(int x) {
-  return 2;
+ 
+  return ~x + 1;
 }
 //3
 /* 
@@ -220,7 +235,18 @@ int negate(int x) {
  *   Rating: 3
  */
 int conditional(int x, int y, int z) {
-  return 2;
+  int condition = !!x; // Double negate because of converting it to either true or false format to begin with
+  int condition_mask = ~condition + 1; 
+  
+  // If condition is true, then condition mask have all bits 'active'
+  int condition_res_true = condition_mask & y;
+
+  // If condition is false, then condition mask have all bits 'inactive'. By negating it, they should all be active
+  int condition_res_false = ~condition_mask & z;
+
+  // One of them is either the original value or all 0000
+  int result = condition_res_true | condition_res_false;
+  return result;
 }
 /* 
  * isLessOrEqual - if x <= y  then return 1, else return 0 
@@ -230,6 +256,14 @@ int conditional(int x, int y, int z) {
  *   Rating: 3
  */
 int isLessOrEqual(int x, int y) {
+
+  // 1. Create mask
+  int condition = x & y;
+
+  // 2, Use mask to make it simplified for boolean operations
+
+  // 3. compare result 
+
   return 2;
 }
 //4
