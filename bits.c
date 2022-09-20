@@ -258,16 +258,22 @@ int conditional(int x, int y, int z) {
 int isLessOrEqual(int x, int y) {
 
   // 1. Create mask
-  int condition = x & y;
+  int is_sign_bit_different_mask = (x ^ y) >> 31; // If signbit is different then 1xxxxxxxxx and then by bit shifting 1111111111... else it will be 0xxxxxxx and then by bit shifting 000000....
 
-  // 2, Use mask to make it simplified for boolean operations
+  // int lt = ~x&y;
+  // int gt = x&~y;
+  // int noSignDiff = !(gt&~lt);
+  int is_negative_mask = x >> 31;
+  int diff = y+(~x+1);
+  int no_sign_diff_res = ((is_negative_mask & (diff) ) | (~is_negative_mask & diff)) ^ (1 << 31);
+  int sign_diff_result = (x & ~y);
 
-  // 3. compare result 
-
-  return 2;
+  int result = ((is_sign_bit_different_mask & sign_diff_result) | (~is_sign_bit_different_mask & no_sign_diff_res)) >> 31;
+  
+  return !!result;
 }
 //4
-/* 
+/*^
  * logicalNeg - implement the ! operator, using all of 
  *              the legal operators except !
  *   Examples: logicalNeg(3) = 0, logicalNeg(0) = 1
@@ -276,7 +282,14 @@ int isLessOrEqual(int x, int y) {
  *   Rating: 4 
  */
 int logicalNeg(int x) {
-  return 2;
+  int even_bits = 0xFF;
+  int mask_end = even_bits << 24;
+  int mask_mid = even_bits << 16;
+  int mask_sec_mid = even_bits << 8;
+
+  int realMask = mask_end | mask_mid | mask_sec_mid | even_bits; 
+
+  return realMask ^ x;
 }
 /* howManyBits - return the minimum number of bits required to represent x in
  *             two's complement
