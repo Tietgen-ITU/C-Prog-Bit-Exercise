@@ -257,18 +257,15 @@ int conditional(int x, int y, int z) {
  */
 int isLessOrEqual(int x, int y) {
 
-  // 1. Create mask
+  // Get mask indicating whether there is a sign bit difference
   int is_sign_bit_different_mask = (x ^ y) >> 31; // If signbit is different then 1xxxxxxxxx and then by bit shifting 1111111111... else it will be 0xxxxxxx and then by bit shifting 000000....
 
-  // int lt = ~x&y;
-  // int gt = x&~y;
-  // int noSignDiff = !(gt&~lt);
-  int is_negative_mask = x >> 31;
-  int diff = y+(~x+1);
-  int no_sign_diff_res = ((is_negative_mask & (diff) ) | (~is_negative_mask & diff)) ^ (1 << 31);
-  int sign_diff_result = (x & ~y);
+  int sign_diff_result = (x & ~y); // Get the result indicating whether the x is greater than y
 
-  int result = ((is_sign_bit_different_mask & sign_diff_result) | (~is_sign_bit_different_mask & no_sign_diff_res)) >> 31;
+  int diff = y+(~x+1); // Get the difference of the two integers
+  int no_sign_diff_res = diff ^ (1 << 31); // Flip the sign bit
+
+  int result = ((is_sign_bit_different_mask & sign_diff_result) | (~is_sign_bit_different_mask & no_sign_diff_res)) >> 31; 
   
   return !!result;
 }
@@ -282,14 +279,12 @@ int isLessOrEqual(int x, int y) {
  *   Rating: 4 
  */
 int logicalNeg(int x) {
-  int even_bits = 0xFF;
-  int mask_end = even_bits << 24;
-  int mask_mid = even_bits << 16;
-  int mask_sec_mid = even_bits << 8;
+  int signBit = x | (~x + 1);
+  int mask = signBit >> 31;
 
-  int realMask = mask_end | mask_mid | mask_sec_mid | even_bits; 
+  int result = (mask & 0) | (~mask & 1);
 
-  return realMask ^ x;
+  return result;
 }
 /* howManyBits - return the minimum number of bits required to represent x in
  *             two's complement
