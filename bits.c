@@ -191,6 +191,10 @@ int bitXor(int x, int y) {
  */
 int tmin(void) {
 
+  /*
+   Because we are in a 32 bit system then we can bit shift 31 positions
+   to the left and create the two's complement minimum integer 
+  */
   return 0x01 << 31;
 }
 //2
@@ -203,17 +207,24 @@ int tmin(void) {
  *   Rating: 2
  */
 int allOddBits(int x) {
+
+  // We create a mask with active bits at even positions
   int even_bits = 0x55;
-  int mask_end = even_bits << 24;
-  int mask_mid = even_bits << 16;
-  int mask_sec_mid = even_bits << 8;
+  int even_bits_end = even_bits << 24;
+  int even_bits_sec_mid = even_bits << 16;
+  int even_bits_mid = even_bits << 8;
 
   // Create a mask for the evenbits
-  int realMask = mask_end | mask_mid | mask_sec_mid | even_bits;
+  int even_bits_mask = even_bits_end | even_bits_sec_mid | even_bits_mid | even_bits;
 
-  int res = (realMask | x) + 1;
+  /*
+    We use the bitwise or to make the bit string only with 1's if the odd bits were active.
+    After we say '+ 1' in order to overflow and make the bit string only 0000000(i.e. if the odd bits were active)
+  */
+  int res = (even_bits_mask | x) + 1;
 
-  return !res;
+  // We then logically negate in order to get 1 if all odd bit were active and 0 if not all odd bits were active
+  return !res; 
 }
 /* 
  * negate - return -x 
@@ -224,7 +235,7 @@ int allOddBits(int x) {
  */
 int negate(int x) {
  
-  return ~x + 1;
+  return ~x + 1; // We negate all bits and say '+1' as mentioned in a lecture
 }
 //3
 /* 
@@ -279,10 +290,11 @@ int isLessOrEqual(int x, int y) {
  *   Rating: 4 
  */
 int logicalNeg(int x) {
-  int signBit = x | (~x + 1);
-  int mask = signBit >> 31;
+  int sign_bit = x | (~x + 1); // If x is 0x00000000 then the sign bit remains 0 after negation due to two's complement undefined behavior for negation at that situation
+  int has_active_bits_mask = sign_bit >> 31; // Create mask with all 0's or 1's 
 
-  int result = (mask & 0) | (~mask & 1);
+  // If we have active bits then return 0 if we do not have active bits return 1
+  int result = (has_active_bits_mask & 0) | (~has_active_bits_mask & 1); 
 
   return result;
 }
