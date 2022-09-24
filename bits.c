@@ -1,7 +1,7 @@
 /* 
  * CS:APP Data Lab 
  * 
- * <Please put your name and userid here>
+ * Andreas Nicolaj Tietgen (anti)
  * 
  * bits.c - Source file with your solutions to the Lab.
  *          This is the file you will hand in to your instructor.
@@ -191,6 +191,10 @@ int bitXor(int x, int y) {
  */
 int tmin(void) {
 
+  /*
+   Because we are in a 32 bit system then we can bit shift 31 positions
+   to the left and create the two's complement minimum integer 
+  */
   return 0x01 << 31;
 }
 //2
@@ -203,17 +207,24 @@ int tmin(void) {
  *   Rating: 2
  */
 int allOddBits(int x) {
+
+  // We create a mask with active bits at even positions
   int even_bits = 0x55;
-  int mask_end = even_bits << 24;
-  int mask_mid = even_bits << 16;
-  int mask_sec_mid = even_bits << 8;
+  int even_bits_end = even_bits << 24;
+  int even_bits_sec_mid = even_bits << 16;
+  int even_bits_mid = even_bits << 8;
 
   // Create a mask for the evenbits
-  int realMask = mask_end | mask_mid | mask_sec_mid | even_bits;
+  int even_bits_mask = even_bits_end | even_bits_sec_mid | even_bits_mid | even_bits;
 
-  int res = (realMask | x) + 1;
+  /*
+    We use the bitwise or to make the bit string only with 1's if the odd bits were active.
+    After we say '+ 1' in order to overflow and make the bit string only 0000000(i.e. if the odd bits were active)
+  */
+  int res = (even_bits_mask | x) + 1;
 
-  return !res;
+  // We then logically negate in order to get 1 if all odd bit were active and 0 if not all odd bits were active
+  return !res; 
 }
 /* 
  * negate - return -x 
@@ -224,7 +235,7 @@ int allOddBits(int x) {
  */
 int negate(int x) {
  
-  return ~x + 1;
+  return ~x + 1; // We negate all bits and say '+1' as mentioned in a lecture
 }
 //3
 /* 
@@ -257,18 +268,15 @@ int conditional(int x, int y, int z) {
  */
 int isLessOrEqual(int x, int y) {
 
-  // 1. Create mask
+  // Get mask indicating whether there is a sign bit difference
   int is_sign_bit_different_mask = (x ^ y) >> 31; // If signbit is different then 1xxxxxxxxx and then by bit shifting 1111111111... else it will be 0xxxxxxx and then by bit shifting 000000....
 
-  // int lt = ~x&y;
-  // int gt = x&~y;
-  // int noSignDiff = !(gt&~lt);
-  int is_negative_mask = x >> 31;
-  int diff = y+(~x+1);
-  int no_sign_diff_res = ((is_negative_mask & (diff) ) | (~is_negative_mask & diff)) ^ (1 << 31);
-  int sign_diff_result = (x & ~y);
+  int sign_diff_result = (x & ~y); // Get the result indicating whether the x is greater than y
 
-  int result = ((is_sign_bit_different_mask & sign_diff_result) | (~is_sign_bit_different_mask & no_sign_diff_res)) >> 31;
+  int diff = y+(~x+1); // Get the difference of the two integers
+  int no_sign_diff_res = diff ^ (1 << 31); // Flip the sign bit
+
+  int result = ((is_sign_bit_different_mask & sign_diff_result) | (~is_sign_bit_different_mask & no_sign_diff_res)) >> 31; 
   
   return !!result;
 }
@@ -282,14 +290,13 @@ int isLessOrEqual(int x, int y) {
  *   Rating: 4 
  */
 int logicalNeg(int x) {
-  int even_bits = 0xFF;
-  int mask_end = even_bits << 24;
-  int mask_mid = even_bits << 16;
-  int mask_sec_mid = even_bits << 8;
+  int sign_bit = x | (~x + 1); // If x is 0x00000000 then the sign bit remains 0 after negation due to two's complement undefined behavior for negation at that situation
+  int has_active_bits_mask = sign_bit >> 31; // Create mask with all 0's or 1's 
 
-  int realMask = mask_end | mask_mid | mask_sec_mid | even_bits; 
+  // If we have active bits then return 0 if we do not have active bits return 1
+  int result = (has_active_bits_mask & 0) | (~has_active_bits_mask & 1); 
 
-  return realMask ^ x;
+  return result;
 }
 /* howManyBits - return the minimum number of bits required to represent x in
  *             two's complement
